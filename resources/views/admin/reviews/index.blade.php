@@ -1,134 +1,134 @@
 <x-admin-layout>
+    @if(session('success'))
+    <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-circle-check"></i>
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @php
+        $totalReviews = $reviews->count();
+        $avgRating = $totalReviews > 0 ? number_format($reviews->avg('rating'), 1) : '0.0';
+        $fiveStars = $reviews->where('rating', 5)->count();
+        $lowStars = $reviews->whereIn('rating', [1, 2])->count();
+        $fiveStarPercentage = $totalReviews > 0 ? round(($fiveStars / $totalReviews) * 100) : 0;
+    @endphp
+
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
             <h2 class="text-2xl font-extrabold text-gray-900 mb-1">Ulasan Customer</h2>
             <p class="text-sm text-gray-500">Lihat feedback dan tingkat kepuasan pelanggan terhadap layanan Anda.</p>
         </div>
         <div class="flex items-center gap-3">
-            <div class="flex -space-x-2">
-                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=A&background=random" alt="">
-                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=B&background=random" alt="">
-                <img class="w-8 h-8 rounded-full border-2 border-white" src="https://ui-avatars.com/api/?name=C&background=random" alt="">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ $avgRating }} Average Rating</p>
+            <div class="flex text-yellow-400 text-sm">
+                <i class="fa-solid fa-star"></i>
             </div>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">4.8 Average Rating</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Total Ulasan</p>
-            <h3 class="text-2xl font-black text-gray-900">1,250</h3>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Ulasan</p>
+            <h3 class="text-3xl font-black text-gray-900">{{ $totalReviews }}</h3>
         </div>
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Bintang 5</p>
-            <div class="flex items-center gap-2">
-                <h3 class="text-2xl font-black text-gray-900">980</h3>
-                <span class="text-green-500 text-xs font-bold"><i class="fa-solid fa-arrow-up"></i> 85%</span>
-            </div>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Rata-rata Rating</p>
+            <h3 class="text-3xl font-black text-gray-900">{{ $avgRating }} <span class="text-sm font-bold text-gray-400">/ 5.0</span></h3>
         </div>
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Bintang 1-2</p>
-            <h3 class="text-2xl font-black text-gray-900">12</h3>
-            <p class="text-[10px] text-red-400 mt-1">*Perlu perhatian segera</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Ulasan Sempurna (5★)</p>
+            <h3 class="text-3xl font-black text-gray-900">{{ $fiveStars }} <span class="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded ml-2">{{ $fiveStarPercentage }}%</span></h3>
         </div>
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Respon Admin</p>
-            <h3 class="text-2xl font-black text-gray-900">100%</h3>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Ulasan Buruk (1-2★)</p>
+            <h3 class="text-3xl font-black text-[#FF5A36]">{{ $lowStars }}</h3>
         </div>
     </div>
 
-    <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-50 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <button class="px-4 py-2 rounded-xl bg-blue-50 text-[#0A58CA] text-xs font-bold">Semua</button>
-                <button class="px-4 py-2 rounded-xl text-gray-400 hover:bg-gray-50 text-xs font-bold transition">Terbaru</button>
-                <button class="px-4 py-2 rounded-xl text-gray-400 hover:bg-gray-50 text-xs font-bold transition">Rating Terendah</button>
-            </div>
-            <div class="relative w-full md:w-64">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="text" placeholder="Cari ulasan..." class="w-full bg-gray-50 border-none pl-10 pr-4 py-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
-            </div>
-        </div>
-
-        <div class="divide-y divide-gray-50">
-            <div class="p-8 hover:bg-gray-50/50 transition group">
+    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="divide-y divide-gray-100">
+            @forelse($reviews as $review)
+            <div class="p-6 md:p-8">
                 <div class="flex flex-col md:flex-row gap-6">
-                    <div class="md:w-48 shrink-0">
-                        <div class="flex items-center gap-3 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Siti+Aminah&background=random" class="w-10 h-10 rounded-full border border-gray-200">
+                    <div class="md:w-64 flex-shrink-0">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">
+                                {{ substr($review->user->name ?? 'A', 0, 1) }}
+                            </div>
                             <div>
-                                <h4 class="text-sm font-bold text-gray-900">Siti Aminah</h4>
-                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Verified Customer</p>
+                                <h4 class="text-sm font-bold text-gray-900">{{ $review->user->name ?? 'Pelanggan' }}</h4>
+                                <div class="flex text-yellow-400 text-[10px]">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
+                                    @endfor
+                                </div>
                             </div>
                         </div>
-                        <div class="flex text-yellow-400 text-xs gap-0.5">
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-2">2 Jam yang lalu</p>
+                        <p class="text-[11px] text-gray-400 mt-2">{{ $review->created_at->diffForHumans() }}</p>
                     </div>
 
                     <div class="flex-1">
                         <div class="mb-2">
-                            <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded uppercase mr-2">Layanan: Cuci Ekspres</span>
+                            <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded uppercase mr-2">
+                                Order: #{{ $review->pesanan->order_number ?? 'Tidak diketahui' }}
+                            </span>
                         </div>
                         <p class="text-sm text-gray-600 leading-relaxed italic">
-                            "Hasil cucian sangat bersih dan wanginya tahan lama. Padahal pilih yang ekspres tapi tetap rapi setrikanya. Terima kasih LaundryCepat!"
+                            "{{ $review->comment ?? 'Pelanggan tidak meninggalkan komentar teks.' }}"
                         </p>
-                        
-                        <div class="mt-4 p-4 bg-gray-50 rounded-2xl border-l-4 border-blue-400">
-                            <p class="text-[11px] font-bold text-blue-600 uppercase mb-1">Balasan Anda:</p>
-                            <p class="text-xs text-gray-500 italic">"Terima kasih Kak Siti! Senang bisa membantu. Ditunggu orderan berikutnya ya!"</p>
+
+                        @if($review->admin_reply)
+                        <div class="mt-4 bg-[#F8FAFC] p-4 rounded-xl border border-gray-100">
+                            <p class="text-xs font-bold text-gray-800 mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-reply text-[#0A58CA]"></i> Balasan Anda:
+                            </p>
+                            <p class="text-sm text-gray-600">{{ $review->admin_reply }}</p>
                         </div>
+                        @endif
                     </div>
 
-                    <div class="md:w-24 flex md:flex-col justify-end gap-2">
-                        <button class="p-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition">Balas</button>
-                        <button class="p-2 text-xs font-bold text-gray-400 hover:text-red-500 rounded-lg transition">Hapus</button>
+                    <div class="md:w-28 flex md:flex-col justify-end gap-2">
+                        <button onclick="document.getElementById('modalBalas{{ $review->id }}').classList.remove('hidden')" class="p-2 text-xs font-bold text-gray-500 hover:text-[#0A58CA] bg-gray-50 hover:bg-blue-50 rounded-lg transition flex items-center gap-2 justify-center">
+                            <i class="fa-solid fa-reply"></i> {{ $review->admin_reply ? 'Edit Balasan' : 'Balas' }}
+                        </button>
+
+                        <form action="{{ route('admin.reviews.destroy', $review->id) }}" method="POST" class="inline-block w-full">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus ulasan ini secara permanen?')" class="w-full p-2 text-xs font-bold text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-lg transition flex items-center gap-2 justify-center">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <div class="p-8 hover:bg-gray-50/50 transition">
-                <div class="flex flex-col md:flex-row gap-6">
-                    <div class="md:w-48 shrink-0">
-                        <div class="flex items-center gap-3 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Andi+Pratama&background=random" class="w-10 h-10 rounded-full border border-gray-200">
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-900">Andi Pratama</h4>
-                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">Verified Customer</p>
-                            </div>
+            <div id="modalBalas{{ $review->id }}" class="hidden fixed inset-0 z-[99] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div class="bg-white rounded-3xl w-full max-w-lg p-6 md:p-8 shadow-2xl mx-4">
+                    <h3 class="text-xl font-extrabold text-gray-900 mb-1">Balas Ulasan</h3>
+                    <p class="text-sm text-gray-500 mb-6">Pelanggan: {{ $review->user->name ?? 'Pelanggan' }}</p>
+                    
+                    <form action="{{ route('admin.reviews.reply', $review->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="mb-6">
+                            <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Pesan Balasan Anda</label>
+                            <textarea name="admin_reply" rows="4" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm resize-none" placeholder="Terima kasih atas kepercayaannya..." required>{{ $review->admin_reply }}</textarea>
                         </div>
-                        <div class="flex text-yellow-400 text-xs gap-0.5">
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-solid fa-star"></i>
-                            <i class="fa-regular fa-star text-gray-300"></i>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="document.getElementById('modalBalas{{ $review->id }}').classList.add('hidden')" class="flex-1 py-3 text-sm font-bold text-gray-600 hover:text-gray-800 transition">Batal</button>
+                            <button type="submit" class="flex-1 bg-[#0A58CA] text-white py-3 rounded-xl text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition">Kirim Balasan</button>
                         </div>
-                        <p class="text-[11px] text-gray-400 mt-2">1 Hari yang lalu</p>
-                    </div>
-                    <div class="flex-1">
-                        <div class="mb-2">
-                            <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded uppercase mr-2">Layanan: Cuci Karpet</span>
-                        </div>
-                        <p class="text-sm text-gray-600 leading-relaxed italic">
-                            "Pengerjaan bagus, cuma pengirimannya agak telat sedikit dari jadwal yang dijanjikan. Overall oke."
-                        </p>
-                    </div>
-                    <div class="md:w-24 flex md:flex-col justify-end gap-2">
-                        <button class="p-2 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded-lg transition">Balas</button>
-                        <button class="p-2 text-xs font-bold text-gray-400 hover:text-red-500 rounded-lg transition">Hapus</button>
-                    </div>
+                    </form>
                 </div>
             </div>
-        </div>
-
-        <div class="p-6 bg-gray-50/50 flex justify-center">
-            <button class="text-sm font-bold text-[#0A58CA] hover:underline">Tampilkan Lebih Banyak</button>
+            @empty
+            <div class="p-12 text-center">
+                <i class="fa-regular fa-star-half-stroke text-4xl text-gray-300 mb-3"></i>
+                <p class="text-sm font-bold text-gray-500">Belum ada ulasan yang masuk dari pelanggan.</p>
+            </div>
+            @endforelse
         </div>
     </div>
 </x-admin-layout>
