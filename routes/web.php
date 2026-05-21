@@ -9,7 +9,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\TrackingController;
-
+use App\Http\Controllers\CustomerProfilController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,7 +44,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     
     // Profile
-    Route::get('/profil', function () { return view('customer.profil'); })->name('profil');
+    Route::get('/profil', [CustomerProfilController::class, 'index'])->name('profil');
+    Route::put('/profil', [CustomerProfilController::class, 'update'])->name('profil.update');
 });
 
 // ==========================================
