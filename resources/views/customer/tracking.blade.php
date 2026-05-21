@@ -1,6 +1,7 @@
 <x-app-layout>
     @php
-        // Logika pemetaan status database 
+        // Logika pemetaan status database ke 5 tahapan desain Anda
+        
         $statusIndex = 0;
         $statusAsli = strtolower($order->status);
 
@@ -16,10 +17,10 @@
             $statusIndex = 4;
         }
         
-        // Perhitungan lebar progress bar 
+        // Perhitungan lebar progress bar (0%, 25%, 50%, 75%, 100%)
         $progressWidth = $statusIndex * 25;
         
-        // Hitung total kuantitas (berat/jumlah)
+        // Hitung total kuantitas (berat/jumlah) dari semua item di pesanan ini
         $totalQty = $order->detail->sum('quantity');
         $mainService = $order->detail->first()->layanan->name ?? 'Layanan Laundry';
         $unitType = $order->detail->first()->layanan->unit_type ?? 'Kg';
@@ -168,7 +169,11 @@
                 </div>
 
                 <div class="flex flex-col gap-3 mt-auto">
-                    @if($order->payment_status === 'unpaid' && $order->payment_method === 'transfer')
+                    @if($statusAsli === 'completed')
+                        <a href="{{ route('customer.reviews', ['pesanan_id' => $order->id]) }}" class="w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-[0_4px_14px_0_rgba(245,158,11,0.4)]">
+                            <i class="fa-solid fa-star mr-1"></i> Beri Ulasan Sekarang
+                        </a>
+                    @elseif($order->payment_status === 'unpaid' && $order->payment_method === 'transfer')
                         <button class="w-full bg-[#0A58CA] hover:bg-blue-800 text-white py-3.5 rounded-xl font-semibold text-sm transition shadow-[0_4px_14px_0_rgba(10,88,202,0.39)]">
                             Unggah Bukti Transfer
                         </button>
