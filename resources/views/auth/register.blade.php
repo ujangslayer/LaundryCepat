@@ -24,37 +24,52 @@
             <div class="md:w-1/2 p-10 md:p-16 flex flex-col justify-center">
                 <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Buat Akun</h2>
                 <p class="text-gray-500 mb-8">Mulai perjalanan kebersihan Anda hari ini.</p>
+@if ($errors->any())
+    <div class="mb-4 bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl p-4">
+        <ul class="list-disc pl-5">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
-                <form method="POST" action="{{ route('register') }}" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
-                        <input type="text" name="name" placeholder="Masukkan nama lengkap Anda" required
-                               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-                    </div>
+<form method="POST" action="{{ route('register') }}" class="space-y-4">
+    @csrf
+    <div>
+        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
+        <input type="text" name="name" value="{{ old('name') }}" placeholder="Masukkan nama lengkap Anda" required
+               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+    </div>
 
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Email</label>
-                        <input type="email" name="email" placeholder="nama@email.com" required
-                               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-                    </div>
+    <div>
+        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Email</label>
+        <input type="email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" required
+               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+    </div>
 
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Nomor Telepon</label>
-                        <input type="text" name="phone" placeholder="08xx xxxx xxxx" required
-                               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-                    </div>
+    <div>
+        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Nomor Telepon</label>
+        <input type="text" name="phone" value="{{ old('phone') }}" placeholder="08xx xxxx xxxx" required
+               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+    </div>
 
-                    <div>
-                        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Kata Sandi</label>
-                        <input type="password" name="password" placeholder="Minimal 8 karakter" required
-                               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
-                    </div>
+    <div>
+        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Kata Sandi</label>
+        <input type="password" name="password" placeholder="Minimal 8 karakter" required
+               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+    </div>
 
-                    <button type="submit" class="w-full bg-[#0A58CA] text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-800 transition shadow-blue-200 mt-4">
-                        Daftar Sekarang
-                    </button>
-                </form>
+    <div>
+        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1.5">Konfirmasi Kata Sandi</label>
+        <input type="password" name="password_confirmation" placeholder="Ulangi kata sandi" required
+               class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none transition text-sm">
+    </div>
+
+    <button type="submit" class="w-full bg-[#0A58CA] text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-blue-800 transition shadow-blue-200 mt-4">
+        Daftar Sekarang
+    </button>
+</form>
 
                 <div class="mt-8 text-center">
                     <div class="relative mb-6">

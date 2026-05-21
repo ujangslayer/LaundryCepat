@@ -35,7 +35,16 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+public function pesanan()
+    {
+        return $this->hasMany(Pesanan::class);
+    }
 
+    // Relasi: 1 User punya Banyak Ulasan
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
     /**
      * The attributes that should be cast.
      *
