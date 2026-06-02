@@ -27,11 +27,11 @@
 <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-500">
     <a href="{{ route('customer.dashboard') }}" class="{{ request()->routeIs('customer.dashboard') ? 'text-[#1a56db] font-bold' : 'hover:text-gray-900 transition' }}">Beranda</a>
     <a href="{{ route('customer.booking') }}" class="{{ request()->routeIs('customer.booking') ? 'text-[#1a56db] font-bold' : 'hover:text-gray-900 transition' }}">Layanan</a>
-    <a href="{{ route('customer.tracking') }}" class="{{ request()->routeIs('customer.tracking') ? 'text-[#1a56db] font-bold' : 'hover:text-gray-900 transition' }}">Lacak Pesanan</a>
+ <a href="{{ route('customer.history') }}" class="{{ request()->routeIs('customer.history') ? 'text-[#1a56db] font-bold' : 'hover:text-gray-900 transition' }}">Riwayat Pesanan</a>
     <a href="{{ route('customer.reviews') }}" class="{{ request()->routeIs('customer.reviews') ? 'text-[#1a56db] font-bold' : 'hover:text-gray-900 transition' }}">Ulasan</a>
 </div>
 
-                        <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-9">
                             <button class="text-gray-400 hover:text-gray-600 transition">
                                 <i class="fa-regular fa-bell text-xl"></i>
                             </button>
