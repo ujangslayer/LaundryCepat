@@ -10,7 +10,7 @@ use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\CustomerProfilController;
-
+use App\Http\Controllers\CustomerDashboardController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -26,9 +26,7 @@ Route::get('/dashboard', function () {
 // GROUP CUSTOMER (Folder: resources/views/customer)
 // ==========================================
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
-    
-    Route::get('/dashboard', function () { return view('customer.dashboard'); })->name('dashboard');
-    
+  Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     // Pesanan
     Route::get('/booking', [BookingController::class, 'index'])->name('booking');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');

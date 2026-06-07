@@ -1,7 +1,6 @@
 <x-app-layout>
     @php
         // Logika pemetaan status database ke 5 tahapan desain Anda
-        
         $statusIndex = 0;
         $statusAsli = strtolower($order->status);
 
