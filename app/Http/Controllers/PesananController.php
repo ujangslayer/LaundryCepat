@@ -35,6 +35,34 @@ class PesananController extends Controller
         $order = Pesanan::findOrFail($id);
         $order->update(['status' => $request->status]);
 
+        $statusTitles = [
+            'picked_up' => 'Pakaian Telah Dijemput 🚚',
+            'washing'   => 'Pakaian Sedang Dicuci 🧼',
+            'ironing'   => 'Pakaian Sedang Disetrika ✨',
+            'ready'     => 'Cucian Siap Diantar/Diambil 📦',
+            'completed' => 'Transaksi Laundry Selesai 🎉',
+            'cancelled' => 'Pesanan Dibatalkan ❌',
+        ];
+
+        $statusMessages = [
+            'picked_up' => "Pesanan #{$order->order_number} telah diambil oleh kurir kami.",
+            'washing'   => "Pakaian Anda pada pesanan #{$order->order_number} sekarang masuk dalam proses pencucian.",
+            'ironing'   => "Proses cuci selesai! Pakaian Anda pada pesanan #{$order->order_number} sedang disetrika rapi.",
+            'ready'     => "Kabar gembira! Cucian Anda pada pesanan #{$order->order_number} sudah bersih dan siap diambil/diantarkan.",
+            'completed' => "Terima kasih telah memercayakan pakaian Anda di toko kami pada pesanan #{$order->order_number}.",
+            'cancelled' => "Mohon maaf, pesanan #{$order->order_number} Anda telah dibatalkan.",
+        ];
+
+        // Jika status yang diubah membutuhkan notifikasi ke user
+        if (array_key_exists($request->status, $statusTitles)) {
+            \App\Models\Notifikasi::create([
+                'user_id' => $order->user_id,
+                'pesanan_id' => $order->id,
+                'judul' => $statusTitles[$request->status],
+                'pesan' => $statusMessages[$request->status],
+                'is_read' => false
+            ]);
+        }
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui menjadi: ' . strtoupper($request->status));
     }
 

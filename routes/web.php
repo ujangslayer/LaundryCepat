@@ -27,7 +27,9 @@ Route::get('/dashboard', function () {
 // ==========================================
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
   Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-    // Pesanan
+  Route::get('/get-notifications', [CustomerDashboardController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/{id}/read', [CustomerDashboardController::class, 'markAsRead'])->name('notifications.read');  
+  // Pesanan
     Route::get('/booking', [BookingController::class, 'index'])->name('booking');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     
@@ -53,6 +55,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     Route::get('/dashboard', [DashboardAdminController::class, 'index'])->name('dashboard');
 
+Route::get('/get-notifications', [CustomerDashboardController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/{id}/read', [CustomerDashboardController::class, 'markAsRead'])->name('notifications.read');
     // Kelola Pesanan (SUDAH DIPERBAIKI: Duplikasi Rute Statis Dihapus)
     Route::get('/orders', [PesananController::class, 'index'])->name('orders.index');
     Route::get('/orders/export', [PesananController::class, 'exportCsv'])->name('orders.export');

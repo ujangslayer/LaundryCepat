@@ -3,8 +3,10 @@
         <div class="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-white opacity-5 rounded-full blur-2xl"></div>
         <div class="absolute bottom-0 left-1/2 w-40 h-40 bg-blue-400 opacity-20 rounded-full blur-xl"></div>
 
-        <div class="relative z-10">
-            <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Selamat Datang, {{ explode(' ', Auth::user()->name)[0] }}!</h1>
+        <div class="relative z-10 flex-1 w-full">
+            <div class="flex items-center justify-between w-full md:justify-start md:gap-6 mb-2">
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">Selamat Datang, {{ explode(' ', Auth::user()->name)[0] }}!</h1>
+            </div>
             <p class="text-blue-100 text-sm max-w-md leading-relaxed font-medium">
                 Pakaian Anda adalah prioritas kami, nikmati layanan antar jemput gratis hari ini.
             </p>
@@ -130,46 +132,69 @@
 
             <div class="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.02)]">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-base font-extrabold text-gray-900 tracking-tight">Informasi Status</h3>
+                    <h3 class="text-base font-extrabold text-gray-900 tracking-tight">Status Laundry Anda</h3>
+                    @if(isset($latestActiveOrder) && $latestActiveOrder)
+                        <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">
+                            Live Tracking
+                        </span>
+                    @endif
                 </div>
                 
-                <div class="flex flex-col gap-4">
-                    <div class="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0A58CA] border border-gray-100 group-hover:border-blue-300 transition-colors">
-                                <i class="fa-solid fa-receipt text-sm"></i>
-                            </div>
+                @if(isset($latestActiveOrder) && $latestActiveOrder)
+                    <div class="mb-2">
+                        <div class="flex justify-between items-center mb-5 bg-gray-50 p-3 rounded-2xl border border-gray-100">
                             <div>
-                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition">Pending / Picked up</h4>
-                                <p class="text-xs text-gray-500 mt-0.5">Pesanan masuk & kurir menjemput pakaian</p>
+                                <p class="text-[10px] font-semibold text-gray-400 uppercase">Nomor Nota</p>
+                                <h4 class="text-xs font-extrabold text-gray-900">#{{ $latestActiveOrder->order_number }}</h4>
                             </div>
+                            <a href="{{ route('customer.tracking', $latestActiveOrder->id) }}" class="text-xs font-bold text-[#0A58CA] hover:underline flex items-center gap-1">
+                                Detail <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
                         </div>
-                    </div>
 
-                    <div class="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0A58CA] border border-gray-100 group-hover:border-blue-300 transition-colors">
-                                <i class="fa-solid fa-soap text-sm"></i>
+                        <div class="relative flex flex-col gap-6 pl-6 border-l-2 @if($latestActiveOrder->status == 'pending') border-gray-200 @else border-blue-500 @endif mt-2 text-left">
+                            
+                            <div class="relative flex items-start gap-4">
+                                <div class="absolute -left-[31px] w-4 h-4 rounded-full border-4 border-white shadow flex items-center justify-center
+                                    @if(in_array($latestActiveOrder->status, ['pending', 'picked_up', 'washing', 'ironing', 'ready', 'completed'])) bg-blue-600 @else bg-gray-300 @endif">
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold @if($latestActiveOrder->status == 'pending' || $latestActiveOrder->status == 'picked_up') text-blue-600 @else text-gray-900 @endif">Pesanan Diterima</h5>
+                                    <p class="text-[11px] text-gray-400">Kurir menjemput / dikonfirmasi admin.</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition">Washing / Ironing</h4>
-                                <p class="text-xs text-gray-500 mt-0.5">Pakaian sedang dicuci atau disetrika rapi</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded-xl hover:bg-gray-50 transition-colors">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0A58CA] border border-gray-100 group-hover:border-blue-300 transition-colors">
-                                <i class="fa-solid fa-box-open text-sm"></i>
+                            <div class="relative flex items-start gap-4">
+                                <div class="absolute -left-[31px] w-4 h-4 rounded-full border-4 border-white shadow flex items-center justify-center
+                                    @if(in_array($latestActiveOrder->status, ['washing', 'ironing', 'ready', 'completed'])) bg-blue-600 @else bg-gray-300 @endif">
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold @if(in_array($latestActiveOrder->status, ['washing', 'ironing'])) text-blue-600 @else text-gray-900 @endif">Sedang Diproses</h5>
+                                    <p class="text-[11px] text-gray-400">Pakaian sedang dicuci atau disetrika rapi.</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition">Ready / Completed</h4>
-                                <p class="text-xs text-gray-500 mt-0.5">Selesai dikemas & siap antar / diambil</p>
+
+                            <div class="relative flex items-start gap-4">
+                                <div class="absolute -left-[31px] w-4 h-4 rounded-full border-4 border-white shadow flex items-center justify-center
+                                    @if(in_array($latestActiveOrder->status, ['ready', 'completed'])) bg-blue-600 @else bg-gray-300 @endif">
+                                </div>
+                                <div>
+                                    <h5 class="text-xs font-bold @if($latestActiveOrder->status == 'ready') text-blue-600 @else text-gray-900 @endif">Siap Diambil / Diantar</h5>
+                                    <p class="text-[11px] text-gray-400">Selesai dikemas, harum, dan siap.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @else
+                    <div class="text-center py-6 text-gray-400">
+                        <div class="w-12 h-12 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-shirt text-lg"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-500 leading-relaxed px-4">
+                            Saat ini Anda tidak memiliki transaksi cucian yang sedang diproses.
+                        </p>
+                    </div>
+                @endif
             </div>
 
         </div>
