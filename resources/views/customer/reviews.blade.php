@@ -1,147 +1,159 @@
 <x-app-layout>
-    <div class="max-w-7xl mx-auto py-10 px-4 xl:px-0">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        <div class="bg-gray-100 rounded-[2rem] p-8 md:p-10 mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-3">Ulasan & Umpan Balik</h1>
+            <p class="text-gray-500 text-sm md:text-base max-w-xl">
+                Bagikan pengalaman Anda menggunakan layanan laundry kami. Penilaian Anda sangat membantu kami untuk terus berkembang.
+            </p>
+        </div>
+
+        @if(session('success'))
+            <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-2xl font-semibold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-circle-check text-green-500 text-base"></i> {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl font-semibold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-circle-xmark text-red-500 text-base"></i> {{ session('error') }}
+            </div>
+        @endif
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <div class="lg:col-span-7 flex flex-col gap-10">
-                
-                <div>
-                    <h1 class="text-4xl md:text-5xl font-extrabold text-[#0B214A] mb-4 leading-tight">
-                        Bagaimana pelayanan kami?
-                    </h1>
-                    <p class="text-gray-500 text-base leading-relaxed max-w-xl">
-                        Masukan Anda membantu kami mempertahankan standar premium yang Anda harapkan dari Laundry Cepat. Beri peringkat pada pesanan terbaru atau ajukan keluhan spesifik.
-                    </p>
-                </div>
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.03)] sticky top-28">
+                    <h3 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-blue-600"></i> Tulis Ulasan Baru
+                    </h3>
 
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 mb-6">Pesanan Terbaru Menunggu Ulasan</h2>
-                    
-                    <div class="flex flex-col gap-6">
-                        
-                        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.02)]">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] font-extrabold text-[#0A58CA] uppercase tracking-wider">PESANAN #LC-8924</span>
-                                <span class="bg-[#EBF3FF] text-[#0A58CA] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Selesai</span>
-                            </div>
+                    @if($unreviewedOrders->isEmpty())
+                        <div class="text-center py-8 bg-gray-50 rounded-2xl p-4 border border-dashed border-gray-200">
+                            <i class="fa-solid fa-face-smile text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-sm font-bold text-gray-700 mb-1">Semua Pesanan Selesai Telah Diulas</p>
+                            <p class="text-xs text-gray-400">Terima kasih atas kontribusi ulasan yang telah Anda berikan!</p>
+                        </div>
+                    @else
+                        <form action="{{ route('customer.reviews.store') }}" method="POST" class="flex flex-col gap-4">
+                            @csrf
                             
-                            <h3 class="text-lg font-bold text-gray-900 mb-1">Cuci Kering Premium</h3>
-                            <p class="text-sm text-gray-500 mb-6">Terkirim Kemarin, 14:30</p>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih Pesanan Anda</label>
+                                <select name="pesanan_id" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 font-semibold text-gray-700">
+                                    <option value="" disabled selected>-- Pilih Invoice --</option>
+                                    @foreach($unreviewedOrders as $item)
+                                        @php 
+                                            $namaService = $item->detail->first()->layanan->name ?? 'Laundry';
+                                        @endphp
+                                        <option value="{{ $item->id }}" {{ $selectedOrderId == $item->id ? 'selected' : '' }}>
+                                            #{{ $item->order_number }} - {{ $namaService }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                            <div class="bg-gray-50 rounded-2xl p-5 mb-4">
-                                <p class="text-sm font-medium text-gray-700 mb-3">Nilai pengalaman Anda</p>
-                                <div class="flex gap-3">
-                                    @for ($i = 0; $i < 5; $i++)
-                                        <button class="w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center hover:bg-gray-300 transition">
-                                            <i class="fa-solid fa-star"></i>
-                                        </button>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Berikan Penilaian (Bintang)</label>
+                                <div class="flex items-center gap-2 text-2xl" id="star-rating-container">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="fa-solid fa-star text-gray-200 cursor-pointer transition star-btn" data-value="{{ $i }}" onclick="setRating({{ $i }})"></i>
                                     @endfor
                                 </div>
+                                <input type="hidden" name="rating" id="rating-input" required value="">
                             </div>
 
-                            <button class="text-sm font-semibold text-[#0A58CA] flex items-center gap-2 hover:text-blue-800 transition">
-                                <i class="fa-solid fa-triangle-exclamation text-xs"></i> Ajukan keluhan untuk pesanan ini
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Ulasan / Komentar Anda</label>
+                                <textarea name="comment" rows="4" placeholder="Cuciannya wangi dan rapi banget, pelayanannya ramah..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 text-gray-700"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-[#0A58CA] hover:bg-blue-800 text-white font-semibold py-3 rounded-xl text-sm transition shadow-md mt-2">
+                                Kirim Ulasan
                             </button>
-                        </div>
-
-                        <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.02)]">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] font-extrabold text-[#0A58CA] uppercase tracking-wider">PESANAN #LC-8891</span>
-                                <span class="bg-[#EBF3FF] text-[#0A58CA] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Selesai</span>
-                            </div>
-                            
-                            <h3 class="text-lg font-bold text-gray-900 mb-1">Cuci & Lipat Standar</h3>
-                            <p class="text-sm text-gray-500 mb-6">Terkirim 12 Okt, 10:00</p>
-
-                            <div class="bg-gray-50 rounded-2xl p-5 mb-4">
-                                <p class="text-sm font-medium text-gray-700 mb-3">Nilai pengalaman Anda</p>
-                                <div class="flex gap-3">
-                                    @for ($i = 0; $i < 4; $i++)
-                                        <button class="w-10 h-10 rounded-full bg-[#FFE8D6] text-[#E87B35] flex items-center justify-center hover:bg-[#ffdfc4] transition">
-                                            <i class="fa-solid fa-star"></i>
-                                        </button>
-                                    @endfor
-                                    <button class="w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center hover:bg-gray-300 transition">
-                                        <i class="fa-solid fa-star"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button class="text-sm font-semibold text-[#0A58CA] flex items-center gap-2 hover:text-blue-800 transition">
-                                <i class="fa-solid fa-triangle-exclamation text-xs"></i> Ajukan keluhan untuk pesanan ini
-                            </button>
-                        </div>
-
-                    </div>
+                        </form>
+                    @endif
                 </div>
             </div>
 
-            <div class="lg:col-span-5">
-                <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_10px_40px_-15px_rgba(6,81,237,0.1)] lg:sticky lg:top-8">
-                    
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Kirim Masukan</h2>
-                    <p class="text-sm text-gray-500 mb-8">
-                        Tidak puas dengan layanan kami? Beritahu kami detailnya agar kami dapat memperbaikinya.
-                    </p>
+            <div class="lg:col-span-2 flex flex-col gap-6">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-comments text-blue-600"></i> Riwayat Ulasan Anda
+                </h3>
 
-                    <form action="#" method="POST" class="flex flex-col gap-6">
-                        <div>
-                            <label class="block text-sm font-bold text-gray-900 mb-3">Apa yang menjadi masalah?</label>
-                            <div class="flex flex-wrap gap-2">
-                                <button type="button" class="bg-[#0A58CA] text-white px-4 py-2 rounded-full text-sm font-medium transition shadow-md">
-                                    Noda Tersisa
-                                </button>
-                                <button type="button" class="bg-[#EBF3FF] text-[#0B214A] hover:bg-blue-100 px-4 py-2 rounded-full text-sm font-medium transition">
-                                    Pengiriman Terlambat
-                                </button>
-                                <button type="button" class="bg-[#EBF3FF] text-[#0B214A] hover:bg-blue-100 px-4 py-2 rounded-full text-sm font-medium transition">
-                                    Barang Rusak
-                                </button>
-                                <button type="button" class="bg-[#EBF3FF] text-[#0B214A] hover:bg-blue-100 px-4 py-2 rounded-full text-sm font-medium transition">
-                                    Barang Hilang
-                                </button>
-                                <button type="button" class="bg-[#EBF3FF] text-[#0B214A] hover:bg-blue-100 px-4 py-2 rounded-full text-sm font-medium transition">
-                                    Lainnya
-                                </button>
+                @forelse($myReviews as $rev)
+                    <div class="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-[0_4px_20px_-5px_rgba(0,0,0,0.02)] flex flex-col gap-4">
+                        
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h4 class="font-extrabold text-gray-900 text-base">
+                                    {{ $rev->pesanan->detail->first()->layanan->name ?? 'Layanan Laundry' }}
+                                </h4>
+                                <p class="text-xs text-gray-400 font-medium mt-0.5">Invoice: <span class="font-bold text-gray-600">#{{ $rev->pesanan->order_number }}</span> • Diulas pada {{ \Carbon\Carbon::parse($rev->created_at)->format('d M Y') }}</p>
+                            </div>
+                            
+                            <div class="flex items-center gap-0.5 text-sm text-amber-400 bg-amber-50 px-3 py-1.5 rounded-full">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="fa-solid fa-star {{ $i <= $rev->rating ? 'text-amber-400' : 'text-gray-200' }}"></i>
+                                @endfor
+                                <span class="text-xs font-extrabold ml-1 text-amber-700">{{ $rev->rating }}.0</span>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-bold text-gray-900 mb-2">Pesanan Terkait (Opsional)</label>
-                            <div class="relative">
-                                <select class="w-full bg-gray-50 border border-gray-200 text-gray-700 py-3.5 px-4 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-[#0A58CA] focus:border-transparent text-sm">
-                                    <option value="">Pilih pesanan...</option>
-                                    <option value="8924">#LC-8924 - Cuci Kering Premium</option>
-                                    <option value="8891">#LC-8891 - Cuci & Lipat Standar</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                        <p class="text-sm text-gray-600 italic bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                            "{{ $rev->comment ?? 'Hanya memberikan rating bintang saja.' }}"
+                        </p>
+
+                        @if($rev->admin_reply)
+                            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 ml-4 md:ml-8 relative before:absolute before:top-4 before:-left-2 before:w-4 before:h-4 before:bg-blue-50 before:border-l before:border-b before:border-blue-100 before:rotate-45">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                                        <i class="fa-solid fa-user-shield"></i>
+                                    </div>
+                                    <span class="text-xs font-extrabold text-blue-900">Tanggapan Admin Laundry</span>
+                                    <span class="text-[10px] text-blue-400 font-medium ml-auto">{{ \Carbon\Carbon::parse($rev->updated_at)->format('d M Y') }}</span>
                                 </div>
+                                <p class="text-xs text-blue-800 leading-relaxed font-medium">
+                                    {{ $rev->admin_reply }}
+                                </p>
                             </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-900 mb-2">Detail</label>
-                            <textarea rows="4" class="w-full bg-gray-50 border border-gray-200 text-gray-700 py-3.5 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A58CA] focus:border-transparent text-sm resize-none placeholder-gray-400" placeholder="Jelaskan masalahnya secara detail..."></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-bold text-gray-900 mb-2">Lampirkan Foto (Opsional)</label>
-                            <div class="border-2 border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition p-6 flex flex-col items-center justify-center text-center cursor-pointer">
-                                <i class="fa-regular fa-image text-2xl text-gray-400 mb-3"></i>
-                                <p class="text-sm text-gray-600 mb-1"><span class="text-[#0A58CA] font-semibold">Unggah file</span> atau seret dan lepas</p>
-                                <p class="text-xs text-gray-400">PNG, JPG hingga 10MB</p>
+                        @else
+                            <div class="text-right">
+                                <span class="text-[11px] font-semibold text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
+                                    <i class="fa-solid fa-hourglass-half animate-spin text-[9px] mr-1"></i> Menunggu tanggapan admin
+                                </span>
                             </div>
-                        </div>
-
-                        <button type="submit" class="w-full bg-[#0A58CA] hover:bg-blue-800 text-white py-3.5 rounded-xl font-semibold text-sm transition mt-2 shadow-[0_4px_14px_0_rgba(10,88,202,0.39)]">
-                            Kirim Masukan
-                        </button>
-                    </form>
-
-                </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="bg-white rounded-[2rem] p-12 text-center border border-gray-100">
+                        <i class="fa-solid fa-comment-slash text-5xl text-gray-300 mb-4"></i>
+                        <h4 class="text-base font-bold text-gray-800 mb-1">Belum Ada Riwayat Ulasan</h4>
+                        <p class="text-sm text-gray-400 max-w-xs mx-auto">Anda belum pernah mengirimkan ulasan umpan balik untuk pesanan laundry Anda.</p>
+                    </div>
+                @endforelse
             </div>
 
         </div>
     </div>
+
+    <script>
+        function setRating(ratingValue) {
+            const stars = document.querySelectorAll('.star-btn');
+            const input = document.getElementById('rating-input');
+            
+            input.value = ratingValue;
+
+            stars.forEach(star => {
+                const value = parseInt(star.getAttribute('data-value'));
+                if (value <= ratingValue) {
+                    star.classList.remove('text-gray-200');
+                    star.classList.add('text-amber-400');
+                } else {
+                    star.classList.remove('text-amber-400');
+                    star.classList.add('text-gray-200');
+                }
+            });
+        }
+    </script>
 </x-app-layout>
