@@ -11,6 +11,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\CustomerProfilController;
 use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\MidtransController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -21,6 +22,7 @@ Route::get('/dashboard', function () {
     }
     return redirect()->route('customer.dashboard');
 })->middleware(['auth'])->name('dashboard');
+
 
 // ==========================================
 // GROUP CUSTOMER (Folder: resources/views/customer)
@@ -35,6 +37,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     
     // Lacak Pesanan
     Route::get('/tracking/{id}', [TrackingController::class, 'track'])->name('tracking');
+    Route::post('/midtrans-callback', [MidtransController::class, 'callback']);
     
     // History
     Route::get('/history', [TrackingController::class, 'index'])->name('history');
@@ -67,7 +70,7 @@ Route::get('/get-notifications', [CustomerDashboardController::class, 'getNotifi
         
     // Kelola Pelanggan 
     Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
-
+Route::get('/customers/export', [CustomerController::class, 'exportCsv'])->name('customer.export');
     // Kelola Layanan 
     Route::get('/services', [LayananController::class, 'index'])->name('services.index');
     Route::post('/services', [LayananController::class, 'store'])->name('services.store');

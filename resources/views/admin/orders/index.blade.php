@@ -12,18 +12,22 @@
     </div>
 
     <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
-        <div class="flex items-center gap-4">
-            <select class="bg-gray-50 border-none text-sm font-semibold text-gray-700 rounded-lg px-4 py-2 outline-none">
-                <option>Semua Status</option>
-                <option>Menunggu</option>
-                <option>Proses</option>
-                <option>Selesai</option>
+<form method="GET" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex items-center gap-4 w-full sm:w-auto">
+            <select name="status" onchange="this.form.submit()" class="bg-gray-50 border-none text-sm font-semibold text-gray-700 rounded-lg px-4 py-2 outline-none w-full sm:w-auto">
+                <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua Status</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                <option value="process" {{ request('status') == 'process' ? 'selected' : '' }}>Proses</option>
+                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
             </select>
         </div>
-        <div class="flex items-center bg-gray-50 px-4 py-2 rounded-lg border border-transparent focus-within:border-gray-200 transition">
+        <div class="flex items-center bg-gray-50 px-4 py-2 rounded-lg border border-transparent focus-within:border-gray-200 transition w-full sm:w-auto">
             <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2 text-sm"></i>
-            <input type="text" placeholder="Cari nomor order / nama..." class="bg-transparent border-none text-sm outline-none w-48 md:w-64 p-0 focus:ring-0 text-gray-700 font-medium">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nomor order / nama..." class="bg-transparent border-none text-sm outline-none w-full md:w-64 p-0 focus:ring-0 text-gray-700 font-medium">
+            <button type="submit" class="hidden"></button>
         </div>
+    </form>
     </div>
 
     <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
@@ -60,9 +64,9 @@
                         </td>
                         <td class="px-8 py-5">
                             @if($order->payment_status === 'paid')
-                                <span class="bg-green-50 text-green-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Selesai</span>
+                                <span class="bg-green-50 text-green-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Telah Dibayar</span>
                             @else
-                                <span class="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Dibatalkan</span>
+                                <span class="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">belum di bayar</span>
                             @endif
                         </td>
                         <td class="px-8 py-5 text-sm font-bold text-gray-900">

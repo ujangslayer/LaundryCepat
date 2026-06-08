@@ -8,10 +8,35 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class PesananController extends Controller
 {
     // 1. Menampilkan daftar semua pesanan (Read List)
-    public function index()
+public function index(Request $request)
     {
-        // Mengambil semua pesanan beserta data User (pelanggan), diurutkan dari yang terbaru
-        $orders = Pesanan::with('user')->latest()->get();
+        // Mulai query dengan memanggil relasi 'user'
+        $query = Pesanan::with('user');
+
+        // Logika Filter Status
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'process') {
+                // Jika pilih 'Proses', tampilkan pesanan yang sedang berjalan
+                $query->whereIn('status', ['picked_up', 'washing', 'ironing', 'ready']);
+            } else {
+                $query->where('status', $request->status); // pending, completed, cancelled
+            }
+        }
+
+        // Logika Pencarian (Nomor Order ATAU Nama Pelanggan)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      // Mencari di tabel users berdasarkan relasi
+                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        // Eksekusi query
+        $orders = $query->latest()->get();
         
         return view('admin.orders.index', compact('orders'));
     }
@@ -76,13 +101,35 @@ class PesananController extends Controller
         $order = Pesanan::findOrFail($id);
         $order->update(['payment_status' => $request->payment_status]);
 
-        $pesanStatus = $request->payment_status === 'paid' ? 'LUNAS' : 'BELUM BAYAR';
+        $pesanStatus = $request->payment_status === 'paid' ? 'Telah Dibayar' : 'Belum Dibayar';
 
         return redirect()->back()->with('success', 'Status pembayaran untuk pesanan #' . $order->order_number . ' berhasil diperbarui menjadi: ' . $pesanStatus);
     }
-    public function exportCsv()
+public function exportCsv(Request $request)
     {
-        $orders = Pesanan::with('user')->latest()->get();
+        $query = Pesanan::with('user');
+
+        // --- Logika filter yang SAMA PERSIS dengan index ---
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'process') {
+                $query->whereIn('status', ['picked_up', 'washing', 'ironing', 'ready']);
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('order_number', 'LIKE', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+        // --- Akhir logika filter ---
+
+        $orders = $query->latest()->get();
         $filename = "laporan_pesanan_laundry_" . date('Y-m-d') . ".csv";
         
         $headers = [
@@ -97,10 +144,7 @@ class PesananController extends Controller
 
         $callback = function() use($orders, $columns) {
             $file = fopen('php://output', 'w');
-            
-            // Tambahkan BOM agar Excel membaca karakter UTF-8 / Rupiah dengan benar tanpa berantakan
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
             fputcsv($file, $columns);
 
             foreach ($orders as $order) {

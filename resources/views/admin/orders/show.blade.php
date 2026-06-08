@@ -12,13 +12,27 @@
         </a>
     </div>
 
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
         <div class="flex flex-wrap items-center gap-3">
             <h2 class="text-3xl font-extrabold text-gray-900">Pesanan #{{ $order->order_number }}</h2>
-            <span class="{{ $order->payment_status === 'paid' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }} text-xs font-bold px-3 py-1 rounded-full uppercase">
-                {{ $order->payment_status === 'paid' ? 'Lunas' : 'Belum Bayar' }}
-            </span>
+            
+            @if($order->status === 'pending')
+                <span class="bg-amber-50 text-amber-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Menunggu Antrean</span>
+            @elseif(in_array($order->status, ['picked_up', 'washing', 'ironing', 'ready']))
+                <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Sedang Diproses</span>
+            @elseif($order->status === 'completed')
+                <span class="bg-green-50 text-green-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Selesai</span>
+            @else
+                <span class="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Dibatalkan</span>
+            @endif
+
+            @if($order->payment_status === 'paid')
+                <span class="bg-green-50 text-green-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Telah Dibayar</span>
+            @else
+                <span class="bg-red-50 text-red-600 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">Belum Dibayar</span>
+            @endif
         </div>
+    
         
         <div class="flex items-center gap-2">
             <a href="{{ route('admin.orders.print', $order->id) }}" target="_blank" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-indigo-700 transition flex items-center gap-2">
@@ -55,7 +69,7 @@
             </div>
 
             <div class="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm">
-                <h3 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-6">Pembaruan Status Kerja</h3>
+                <h3 class="text-sm font-black text-gray-900 uppercase tracking-wider mb-6">Pembaruan Status</h3>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <form action="{{ route('admin.orders.update_status', $order->id) }}" method="POST" class="space-y-2">
@@ -79,11 +93,11 @@
                     <form action="{{ route('admin.orders.update_payment', $order->id) }}" method="POST" class="space-y-2">
                         @csrf
                         @method('PUT')
-                        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Verifikasi Status Kasir</label>
+                        <label class="block text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Verifikasi Status Pembayaran</label>
                         <div class="flex gap-2">
                             <select name="payment_status" class="flex-1 bg-gray-50 border border-gray-200 text-sm font-bold text-gray-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                <option value="unpaid" {{ $order->payment_status === 'unpaid' ? 'selected' : '' }}>BELUM LUNAS</option>
-                                <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>LUNAS</option>
+                                <option value="unpaid" {{ $order->payment_status === 'unpaid' ? 'selected' : '' }}>Belum dibayar</option>
+                                <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Telah di bayar</option>
                             </select>
                             <button type="submit" class="bg-emerald-600 text-white px-4 rounded-xl text-xs font-bold hover:bg-emerald-700 transition">Simpan</button>
                         </div>

@@ -9,14 +9,13 @@
         } elseif ($statusAsli == 'washing') {
             $statusIndex = 1;
         } elseif ($statusAsli == 'ironing') {
-            $statusIndex = 2; // Mengeringkan/Setrika
+            $statusIndex = 2; 
         } elseif ($statusAsli == 'ready') {
             $statusIndex = 3;
         } elseif ($statusAsli == 'completed') {
             $statusIndex = 4;
         }
         
-        // Perhitungan lebar progress bar (0%, 25%, 50%, 75%, 100%)
         $progressWidth = $statusIndex * 25;
         
         // Hitung total kuantitas (berat/jumlah) dari semua item di pesanan ini
@@ -77,7 +76,7 @@
                         <div class="absolute top-1/2 left-0 h-1 bg-[#0A58CA] -translate-y-1/2 rounded-full transition-all duration-500" style="width: {{ $progressWidth }}%;"></div>
                         
                         <div class="relative flex justify-between">
-                            @foreach(['Pesanan Diterima', 'Sedang Dicuci', 'Mengeringkan/Setrika', 'Siap Diambil', 'Selesai'] as $index => $label)
+                            @foreach(['Pesanan Diterima', 'Sedang Dicuci', 'Sedang Disetrika', 'Siap Diambil', 'Selesai'] as $index => $label)
                                 <div class="flex flex-col items-center">
                                     <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-4 transition-all duration-300 {{ $statusIndex >= $index ? 'bg-[#0A58CA] border-blue-100 text-white shadow-md' : 'bg-white border-gray-100 text-gray-400' }}">
                                         @if($statusIndex > $index)
@@ -168,17 +167,42 @@
                 </div>
 
                 <div class="flex flex-col gap-3 mt-auto">
-                    @if($statusAsli === 'completed')
-                        <a href="{{ route('customer.reviews', ['pesanan_id' => $order->id]) }}" class="w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-[0_4px_14px_0_rgba(245,158,11,0.4)]">
+                  @if($statusAsli === 'completed')
+                        <a href="{{ route('customer.reviews', ['pesanan_id' => $order->id]) }}" class=\"w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-[0_4px_14px_0_rgba(245,158,11,0.4)]\">
                             <i class="fa-solid fa-star mr-1"></i> Beri Ulasan Sekarang
                         </a>
                     @elseif($order->payment_status === 'unpaid' && $order->payment_method === 'transfer')
-                        <button class="w-full bg-[#0A58CA] hover:bg-blue-800 text-white py-3.5 rounded-xl font-semibold text-sm transition shadow-[0_4px_14px_0_rgba(10,88,202,0.39)]">
-                            Unggah Bukti Transfer
+                    
+                        <button id="pay-button" class="w-full bg-[#0A58CA] hover:bg-blue-800 text-white py-3.5 rounded-xl font-semibold text-sm transition shadow-[0_4px_14px_0_rgba(10,88,202,0.39)] flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-wallet"></i> Bayar Sekarang
                         </button>
+
+                        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+                        
+                        <script type="text/javascript">
+                            document.getElementById('pay-button').onclick = function () {
+                                // Panggil widget Snap menggunakan token yang dikirim dari controller
+                                snap.pay('{{ $order->snap_token }}', {
+                                    onSuccess: function(result){
+                                        // Muat ulang halaman agar status pembayaran berubah (jika webhook sudah aktif)
+                                        window.location.reload();
+                                    },
+                                    onPending: function(result){
+                                        window.location.reload();
+                                    },
+                                    onError: function(result){
+                                        alert("Terjadi kesalahan pada sistem pembayaran.");
+                                        console.log(result);
+                                    },
+                                    onClose: function(){
+                                        console.log('Pelanggan menutup pop-up sebelum menyelesaikan transaksi');
+                                    }
+                                });
+                            };
+                        </script>
                     @else
                         <button disabled class="w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl font-semibold text-sm cursor-not-allowed">
-                            <i class="fa-solid fa-circle-check text-green-500 mr-1"></i> Transaksi Terverifikasi
+                            Pembayaran Berhasil / COD
                         </button>
                     @endif
                 </div>
