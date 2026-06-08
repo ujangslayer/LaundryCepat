@@ -2,13 +2,20 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
-// 1. Landing Page
+use App\Http\Controllers\LayananController;
+use App\Http\Controllers\PesananController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\DashboardAdminController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\CustomerProfilController;
+use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\MidtransController;
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 2. Redirect Dashboard (Polisi Lalu Lintas)
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'admin') {
         return redirect()->route('admin.dashboard');
@@ -16,50 +23,64 @@ Route::get('/dashboard', function () {
     return redirect()->route('customer.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
+
 // ==========================================
 // GROUP CUSTOMER (Folder: resources/views/customer)
 // ==========================================
-Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
+Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+  Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+  Route::get('/get-notifications', [CustomerDashboardController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/{id}/read', [CustomerDashboardController::class, 'markAsRead'])->name('notifications.read');  
+  // Pesanan
+    Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
     
-    Route::get('/dashboard', function () { return view('customer.dashboard'); })->name('dashboard');
+    // Lacak Pesanan
+    Route::get('/tracking/{id}', [TrackingController::class, 'track'])->name('tracking');
+    Route::post('/midtrans-callback', [MidtransController::class, 'callback']);
     
-    // Sesuaikan dengan nama file Anda: booking.blade.php
-    Route::get('/booking', function () { return view('customer.booking'); })->name('booking');
+    // History
+    Route::get('/history', [TrackingController::class, 'index'])->name('history');
     
-    // tracking.blade.php
-    Route::get('/tracking', function () { return view('customer.tracking'); })->name('tracking');
+    // Ulasan (SUDAH DIPERBAIKI: Mengarah ke Controller & Ditambah Route POST)
+    Route::get('/reviews', [ReviewController::class, 'customerIndex'])->name('reviews');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     
-    // history.blade.php
-    Route::get('/history', function () { return view('customer.history'); })->name('history');
-    
-    // reviews.blade.php
-    Route::get('/reviews', function () { return view('customer.reviews'); })->name('reviews');
-    
-    // profile.blade.php
-    Route::get('/profil', function () { return view('customer.profil'); })->name('profil');
+    // Profile
+    Route::get('/profil', [CustomerProfilController::class, 'index'])->name('profil');
+    Route::put('/profil', [CustomerProfilController::class, 'update'])->name('profil.update');
 });
 
 // ==========================================
 // GROUP ADMIN (Folder: resources/views/admin)
 // ==========================================
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     
-    Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+    Route::get('/dashboard', [DashboardAdminController::class, 'index'])->name('dashboard');
 
-    // Kelola Pesanan (admin/orders/index.blade.php)
-    Route::get('/orders', function () { return view('admin.orders.index'); })->name('orders.index');
-    
-    // Detail Pesanan (admin/orders/show.blade.php)
-    Route::get('/orders/{id}', function () { return view('admin.orders.show'); })->name('orders.show');
-
-    // Kelola Pelanggan (admin/customers/index.blade.php)
-    Route::get('/customer', function () { return view('admin.customer.index'); })->name('customer.index');
-
-    // Kelola Layanan (admin/services/index.blade.php)
-    Route::get('/services', function () { return view('admin.services.index'); })->name('services.index');
-
-    // Ulasan Customer (admin/reviews/index.blade.php)
-    Route::get('/reviews', function () { return view('admin.reviews.index'); })->name('reviews.index');
+Route::get('/get-notifications', [CustomerDashboardController::class, 'getNotifications'])->name('notifications.get');
+    Route::post('/notifications/{id}/read', [CustomerDashboardController::class, 'markAsRead'])->name('notifications.read');
+    // Kelola Pesanan (SUDAH DIPERBAIKI: Duplikasi Rute Statis Dihapus)
+    Route::get('/orders', [PesananController::class, 'index'])->name('orders.index');
+    Route::get('/orders/export', [PesananController::class, 'exportCsv'])->name('orders.export');
+    Route::get('/orders/{id}', [PesananController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{id}/print', [PesananController::class, 'printReceipt'])->name('orders.print');
+    Route::put('/orders/{id}/status', [PesananController::class, 'updateStatus'])->name('orders.update_status');
+    Route::put('/orders/{id}/payment', [PesananController::class, 'updatePaymentStatus'])->name('orders.update_payment');
+        
+    // Kelola Pelanggan 
+    Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+Route::get('/customers/export', [CustomerController::class, 'exportCsv'])->name('customer.export');
+    // Kelola Layanan 
+    Route::get('/services', [LayananController::class, 'index'])->name('services.index');
+    Route::post('/services', [LayananController::class, 'store'])->name('services.store');
+    Route::put('/services/{id}', [LayananController::class, 'update'])->name('services.update');
+    Route::delete('/services/{id}', [LayananController::class, 'destroy'])->name('services.destroy');
+   
+    // Kelola Ulasan 
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::put('/reviews/{id}/reply', [ReviewController::class, 'reply'])->name('reviews.reply');
 });
 
 require __DIR__.'/auth.php';

@@ -52,16 +52,6 @@
                         MASUK
                     </button>
                 </form>
-
-                <div class="mt-8 text-center">
-                    <div class="relative mb-6">
-                        <hr class="border-gray-200">
-                        <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-4 text-xs font-medium text-gray-500">atau lanjutkan dengan</span>
-                    </div>
-                    <button class="w-full border border-gray-200 py-3 rounded-xl flex items-center justify-center gap-3 font-semibold text-gray-700 hover:bg-gray-50 transition">
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
-                        Google
-                    </button>
                     <p class="mt-8 text-sm text-gray-500">
                         Belum punya akun? <a href="{{ route('register') }}" class="text-[#0A58CA] font-bold hover:underline">Daftar sekarang</a>
                     </p>
