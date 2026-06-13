@@ -88,7 +88,7 @@
                     <input type="radio" name="payment_method" value="transfer" class="peer sr-only">
                     <div class="border border-gray-200 rounded-2xl p-5 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition">
                         <h4 class="font-bold text-gray-900 mb-1">Transfer Bank</h4>
-                        <p class="text-xs text-gray-500">Bayar via transfer (BCA/Mandiri/BRI).</p>
+                        <p class="text-xs text-gray-500">Bayar via transfer (Bank/E-wallet).</p>
                     </div>
                 </label>
             </div>
