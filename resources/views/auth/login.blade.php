@@ -35,9 +35,7 @@
                     <div>
                         <div class="flex justify-between items-end mb-2">
                             <label class="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest">Kata Sandi</label>
-                            @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" class="text-xs font-bold text-[#0A58CA] hover:underline">Lupa Kata Sandi?</a>
-                            @endif
+                       
                         </div>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
