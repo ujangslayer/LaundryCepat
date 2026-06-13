@@ -23,6 +23,7 @@ Route::get('/dashboard', function () {
     return redirect()->route('customer.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
+Route::post('/midtrans-callback', [MidtransController::class, 'callback']);
 
 // ==========================================
 // GROUP CUSTOMER (Folder: resources/views/customer)
@@ -37,7 +38,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     
     // Lacak Pesanan
     Route::get('/tracking/{id}', [TrackingController::class, 'track'])->name('tracking');
-    Route::post('/midtrans-callback', [MidtransController::class, 'callback']);
+   
     
     // History
     Route::get('/history', [TrackingController::class, 'index'])->name('history');
