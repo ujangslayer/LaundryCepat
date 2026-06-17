@@ -28,6 +28,7 @@ class BookingController extends Controller
             'layanan.*.qty' => 'nullable|numeric|min:0',
             'delivery_option' => 'required|in:dropoff,pickup',
             'waktu_pengambilan' => 'nullable|date',
+            'alamat' => 'required_if:delivery_option,pickup',
             'payment_method' => 'required|in:cod,transfer',
         ]);
 
@@ -52,6 +53,7 @@ class BookingController extends Controller
             'order_number' => $orderNumber,
             'delivery_option' => $request->delivery_option,
             'waktu_pengambilan' => $request->delivery_option === 'pickup' ? $request->waktu_pengambilan : null,
+           'alamat' => $request->delivery_option === 'pickup' ? $request->alamat : null,
             'status' => 'pending', // Baru masuk otomatis pending
             'payment_method' => $request->payment_method,
             'payment_status' => 'unpaid',

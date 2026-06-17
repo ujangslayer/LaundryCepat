@@ -38,8 +38,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->name('customer
     
     // Lacak Pesanan
     Route::get('/tracking/{id}', [TrackingController::class, 'track'])->name('tracking');
-   
-    
+   Route::put('/tracking/{id}/cancel', [TrackingController::class, 'cancel'])->name('tracking.cancel');
+    Route::get('/tracking/{id}/print', [TrackingController::class, 'printReceipt'])->name('tracking.print');
     // History
     Route::get('/history', [TrackingController::class, 'index'])->name('history');
     
