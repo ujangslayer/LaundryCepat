@@ -24,13 +24,21 @@
         $unitType = $order->detail->first()->layanan->unit_type ?? 'Kg';
     @endphp
 
-    <div class="max-w-6xl mx-auto mb-8 pt-4 px-4 xl:px-0">
+<div class="max-w-6xl mx-auto mb-8 pt-4 px-4 xl:px-0">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-[#0B214A] mb-2">Detail & Lacak Pesanan</h1>
                 <p class="text-gray-500 text-sm font-medium">Pantau status pesanan laundry Anda secara real-time di sini.</p>
             </div>
-            <div>
+            
+            <!-- UBAH BAGIAN INI: Menambahkan gap dan tombol Cetak Struk -->
+            <div class="flex items-center gap-3">
+                <!-- Tombol Cetak Struk Baru -->
+                <a href="{{ route('customer.tracking.print', $order->id) }}" target="_blank" class="inline-flex items-center gap-2 bg-[#0A58CA] hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm">
+                    <i class="fa-solid fa-print"></i> Cetak Struk
+                </a>
+
+                <!-- Tombol Kembali yang sudah ada -->
                 <a href="{{ route('customer.history') }}" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition">
                     <i class="fa-solid fa-arrow-left"></i> Kembali ke Riwayat
                 </a>
@@ -158,7 +166,17 @@
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-gray-400 font-medium">Opsi Penyerahan</span>
                         <span class="font-bold text-gray-700 uppercase">{{ $order->delivery_option }}</span>
+                   
                     </div>
+                @if($order->delivery_option === 'pickup' && $order->alamat)
+                        <div class="flex gap-3 text-sm mt-3 pt-3 border-t border-gray-100">
+                            <i class="fa-solid fa-location-dot text-gray-400 mt-1 w-5 text-center"></i>
+                            <div>
+                                <p class="text-gray-500 text-xs mb-0.5">Alamat Penjemputan/Pengantaran:</p>
+                                <p class="text-gray-800 font-semibold leading-relaxed">{{ $order->alamat }}</p>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="border-t border-dashed border-gray-200 pt-6 mb-8 flex justify-between items-center">
@@ -166,13 +184,30 @@
                     <span class="text-xl font-extrabold text-[#0A58CA]">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</span>
                 </div>
 
-                <div class="flex flex-col gap-3 mt-auto">
-                  @if($statusAsli === 'completed')
-                        <a href="{{ route('customer.reviews', ['pesanan_id' => $order->id]) }}" class=\"w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-[0_4px_14px_0_rgba(245,158,11,0.4)]\">
+              <div class="flex flex-col gap-3 mt-auto">
+                    @if(in_array(strtolower($order->status), ['pending', 'picked_up']))
+                    <div class="mt-4">
+                        <form action="{{ route('customer.tracking.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pesanan laundry ini?');">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 py-3.5 rounded-xl font-bold text-sm transition flex justify-center items-center gap-2">
+                                <i class="fa-solid fa-ban"></i> Batalkan Pesanan
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    @if($statusAsli === 'cancelled')
+                        <button disabled class="w-full bg-red-50 text-red-400 border border-red-100 py-3.5 rounded-xl font-semibold text-sm cursor-not-allowed">
+                            Pesanan Dibatalkan
+                        </button>
+
+                    @elseif($statusAsli === 'completed' && $order->payment_status === 'paid')
+                        <a href="{{ route('customer.reviews', ['pesanan_id' => $order->id]) }}" class="w-full text-center bg-amber-500 hover:bg-amber-600 text-white py-3.5 rounded-xl font-bold text-sm transition shadow-[0_4px_14px_0_rgba(245,158,11,0.4)]">
                             <i class="fa-solid fa-star mr-1"></i> Beri Ulasan Sekarang
                         </a>
+
                     @elseif($order->payment_status === 'unpaid' && $order->payment_method === 'transfer')
-                    
                         <button id="pay-button" class="w-full bg-[#0A58CA] hover:bg-blue-800 text-white py-3.5 rounded-xl font-semibold text-sm transition shadow-[0_4px_14px_0_rgba(10,88,202,0.39)] flex items-center justify-center gap-2">
                             <i class="fa-solid fa-wallet"></i> Bayar Sekarang
                         </button>
@@ -181,10 +216,8 @@
                         
                         <script type="text/javascript">
                             document.getElementById('pay-button').onclick = function () {
-                                // Panggil widget Snap menggunakan token yang dikirim dari controller
                                 snap.pay('{{ $order->snap_token }}', {
                                     onSuccess: function(result){
-                                        // Muat ulang halaman agar status pembayaran berubah (jika webhook sudah aktif)
                                         window.location.reload();
                                     },
                                     onPending: function(result){
@@ -200,9 +233,15 @@
                                 });
                             };
                         </script>
+
+                    @elseif($statusAsli === 'completed' && $order->payment_status !== 'paid')
+                        <button disabled class="w-full bg-orange-50 text-orange-500 border border-orange-100 py-3.5 rounded-xl font-semibold text-sm cursor-not-allowed flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-clock"></i> Selesai (Menunggu Pembayaran)
+                        </button>
+
                     @else
                         <button disabled class="w-full bg-gray-100 text-gray-400 py-3.5 rounded-xl font-semibold text-sm cursor-not-allowed">
-                            Pembayaran Berhasil / COD
+                            Pembayaran Berhasil
                         </button>
                     @endif
                 </div>

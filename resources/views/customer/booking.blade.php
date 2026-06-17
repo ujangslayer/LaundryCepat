@@ -64,11 +64,20 @@
                 </label>
             </div>
 
-            <div id="pickupTimeContainer" class="hidden pl-0 md:pl-12">
-                <label class="text-xs font-bold text-gray-700 mb-2 block">Pilih Waktu Penjemputan</label>
-                <input type="datetime-local" name="waktu_pengambilan" class="w-full md:w-1/2 border-gray-200 rounded-xl focus:ring-blue-500 text-sm">
+           <div id="pickupTimeContainer" class="mt-6 hidden bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Tentukan Waktu Pengambilan <span class="text-red-500">*</span></label>
+                <input type="datetime-local" name="waktu_pengambilan" id="waktu_pengambilan" class="w-full border-gray-200 rounded-xl focus:border-[#0A58CA] focus:ring-[#0A58CA] transition">
             </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Alamat Lengkap Penjemputan / Pengantaran <span class="text-red-500">*</span></label>
+                <textarea name="alamat" id="alamat" rows="3" class="w-full border-gray-200 rounded-xl focus:border-[#0A58CA] focus:ring-[#0A58CA] transition" placeholder="Contoh: Jl. Sudirman No.12, RT 01/RW 02, Patokan: Sebelah warung biru..."></textarea>
+            </div>
+            
         </div>
+      
 
         <div class="mb-12">
             <div class="flex items-center gap-4 mb-6">
@@ -102,13 +111,18 @@
         </div>
     </form>
 
-    <script>
+<script>
         function togglePickupTime(show) {
             const container = document.getElementById('pickupTimeContainer');
             if(show) {
                 container.classList.remove('hidden');
+                document.getElementById('waktu_pengambilan').required = true;
+                document.getElementById('alamat').required = true; // Alamat jadi wajib
             } else {
                 container.classList.add('hidden');
+                document.getElementById('waktu_pengambilan').required = false;
+                document.getElementById('alamat').required = false; // Alamat tidak wajib
+                document.getElementById('alamat').value = ''; // Reset form alamat
             }
         }
     </script>

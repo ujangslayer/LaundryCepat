@@ -136,6 +136,15 @@
                         <i class="fa-solid fa-calendar-days text-gray-400 mt-1 w-5"></i>
                         <p class="text-gray-600">Jadwal Pengambilan: <br><span class="font-bold text-gray-800">{{ $order->waktu_pengambilan }}</span></p>
                     </div>
+                    @if($order->delivery_option === 'pickup' && $order->alamat)
+                        <div class="flex gap-3 text-sm mt-3 pt-3 border-t border-gray-100">
+                            <i class="fa-solid fa-location-dot text-gray-400 mt-1 w-5 text-center"></i>
+                            <div>
+                                <p class="text-gray-500 text-xs mb-0.5">Alamat Penjemputan/Pengantaran:</p>
+                                <p class="text-gray-800 font-semibold leading-relaxed">{{ $order->alamat }}</p>
+                            </div>
+                        </div>
+                    @endif
                     @endif
                 </div>
             </div>

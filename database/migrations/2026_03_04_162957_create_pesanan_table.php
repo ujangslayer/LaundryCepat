@@ -17,7 +17,7 @@ return new class extends Migration
         $table->string('order_number')->unique();
         $table->enum('delivery_option', ['dropoff', 'pickup'])->default('dropoff');
         $table->dateTime('waktu_pengambilan')->nullable();
-        
+        $table->text('alamat')->nullable();
         $table->enum('status', [
             'pending', 'picked_up', 'washing', 'ironing', 'ready', 'completed', 'cancelled'
         ])->default('pending');

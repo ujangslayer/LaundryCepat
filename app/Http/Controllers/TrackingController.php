@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pesanan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 // Import Library Midtrans di sini
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -70,5 +71,43 @@ class TrackingController extends Controller
         // --- INTEGRASI MIDTRANS END ---
                     
         return view('customer.tracking', compact('order'));
+    }
+    // Tambahkan method ini di dalam TrackingController
+    public function cancel($id)
+    {
+        // Cari pesanan berdasarkan ID dan pastikan itu milik user yang sedang login
+        $order = Pesanan::where('user_id', Auth::id())->findOrFail($id);
+
+        // Validasi: Hanya bisa dibatalkan jika statusnya pending atau picked_up
+        if (!in_array($order->status, ['pending', 'picked_up'])) {
+            return back()->with('error', 'Maaf, pesanan sudah diproses dan tidak dapat dibatalkan.');
+        }
+
+        // Ubah status menjadi cancelled
+        $order->status = 'cancelled';
+        $order->save();
+
+        // (Opsional) Jika kamu pakai Midtrans dan ingin membatalkan tagihannya juga di Midtrans
+        // bisa tambahkan logika API cancel Midtrans di sini.
+
+        return back()->with('success', 'Pesanan Anda berhasil dibatalkan.');
+    }
+    // 4. Mencetak Struk Pesanan Customer
+    public function printReceipt($id)
+    {
+        // Cari pesanan dan pastikan itu milik customer yang login
+        $order = Pesanan::with(['detail.layanan', 'user'])
+                    ->where('user_id', Auth::id())
+                    ->findOrFail($id);
+
+        // Panggil file view struk. 
+        // Sesuaikan 'admin.orders.print' dengan lokasi file struk kamu saat ini.
+        // Jika file struknya bernama print.blade.php di dalam folder views/admin, gunakan 'admin.print'
+        $pdf = Pdf::loadView('admin.orders.receipt', compact('order'));
+        
+        // Ukuran kertas nota kasir (A5 Portrait cocok untuk struk laundry)
+        $pdf->setPaper('A5', 'portrait');
+        
+        return $pdf->stream('Struk_Laundry_' . $order->order_number . '.pdf');
     }
 }
